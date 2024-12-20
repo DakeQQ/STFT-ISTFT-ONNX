@@ -12,6 +12,8 @@ from STFT_Process import STFT_Process
 from pydub import AudioSegment
 import torch
 
+test_audio = './audio_file.mp3' # Specify the path to your audio file.
+
 # Configuration Parameters
 MAX_SIGNAL_LENGTH = 1024        # Maximum number of frames for audio length after STFT. Use larger values for long audio inputs (e.g., 4096).
 INPUT_AUDIO_LENGTH = 5120       # Length of the audio input signal (in samples) for static axis export. Should be a multiple of NFFT.
@@ -20,8 +22,8 @@ N_MELS = 100                    # Number of Mel bands for the Mel-spectrogram.
 NFFT = 512                      # Number of FFT components for the STFT process.
 HOP_LENGTH = 128                # Number of samples between successive frames in the STFT.
 SAMPLE_RATE = 16000             # Target sample rate.
-
-test_audio = './audio_file.mp3'
+STFT_TYPE = "stft_B"            # stft_A: output real_part only;  stft_B: outputs real_part & imag_part
+ISTFT_TYPE = "istft_B"          # istft_A: Inputs = [magnitude, phase];  istft_B: Inputs = [magnitude, real_part, imag_part], The dtype of imag_part is float format.
 
 # Load the audio
 audio = torch.tensor(
@@ -36,7 +38,7 @@ audio_parts = audio[:, :, :INPUT_AUDIO_LENGTH]
 
 # Create the STFT model
 custom_stft = STFT_Process(
-    model_type='stft_B', 
+    model_type=STFT_TYPE, 
     n_fft=NFFT, 
     n_mels=N_MELS, 
     hop_len=HOP_LENGTH, 
@@ -52,7 +54,7 @@ magnitude = torch.sqrt(real_part**2 + imag_part**2)
 
 # Create the ISTFT model
 custom_istft = STFT_Process(
-    model_type='istft_B', 
+    model_type=ISTFT_TYPE, 
     n_fft=NFFT, 
     n_mels=N_MELS, 
     hop_len=HOP_LENGTH, 
