@@ -19,13 +19,13 @@ Export the STFT or ISTFT process in ONNX format.
    # Load the audio
    audio = torch.tensor(AudioSegment.from_file(test_audio).set_channels(1).set_frame_rate(SAMPLE_RATE).get_array_of_samples(), dtype=torch.float32) / 32768.0
    audio = audio.reshape(1, 1, -1)
-   audio = audio[:, :, :INPUT_AUDIO_LENGTH]
+   audio_parts = audio[:, :, :INPUT_AUDIO_LENGTH]
 
    # Create the stft model, The stft_A output the real_part only.
    custom_stft = STFT_Process(model_type='stft_B', n_fft=NFFT, n_mels=N_MELS, hop_len=HOP_LENGTH, max_frames=0, window_type=WINDOW_TYPE).eval()
 
    # Process the audio
-   real_part, imag_part = self.stft_model(audio, 'constant')  # pad mode = ['constant', 'reflect'];
+   real_part, imag_part = self.stft_model(audio_parts, 'constant')  # pad mode = ['constant', 'reflect'];
    
    #______________________________________________________________________________________________________________________________________________
 
@@ -36,7 +36,7 @@ Export the STFT or ISTFT process in ONNX format.
    magnitude = torch.sqrt(real_part * real_part + imag_part * imag_part)
 
    # Convert it back to the audio.
-   audio = self.istft_model(magnitude, real_part, imag_part)
+   audio_parts = self.istft_model(magnitude, real_part, imag_part)
    
    ```
 
@@ -62,13 +62,13 @@ Export the STFT or ISTFT process in ONNX format.
    # Load the audio
    audio = torch.tensor(AudioSegment.from_file(test_audio).set_channels(1).set_frame_rate(SAMPLE_RATE).get_array_of_samples(), dtype=torch.float32) / 32768.0
    audio = audio.reshape(1, 1, -1)
-   audio = audio[:, :, :INPUT_AUDIO_LENGTH]
+   audio_parts = audio[:, :, :INPUT_AUDIO_LENGTH]
 
    # Create the stft model, The stft_A output the real_part only.
    custom_stft = STFT_Process(model_type='stft_B', n_fft=NFFT, n_mels=N_MELS, hop_len=HOP_LENGTH, max_frames=0, window_type=WINDOW_TYPE).eval()
 
    # Process the audio
-   real_part, imag_part = self.stft_model(audio, 'constant')  # pad mode = ['constant', 'reflect'];
+   real_part, imag_part = self.stft_model(audio_parts, 'constant')  # pad mode = ['constant', 'reflect'];
    
    #______________________________________________________________________________________________________________________________________________
 
@@ -79,7 +79,7 @@ Export the STFT or ISTFT process in ONNX format.
    magnitude = torch.sqrt(real_part * real_part + imag_part * imag_part)
 
    # Convert it back to the audio.
-   audio = self.istft_model(magnitude, real_part, imag_part)
+   audio_parts = self.istft_model(magnitude, real_part, imag_part)
 
    ```
 
