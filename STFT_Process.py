@@ -1,7 +1,6 @@
 import numpy as np
 import onnxruntime as ort
 import torch
-from librosa import util as librosa_util
 
 # To export your own STFT process ONNX model, set the following values.
 
@@ -9,8 +8,8 @@ DYNAMIC_AXES = True                                 # Default dynamic axes is in
 N_MELS = 100                                        # Number of Mel bands to generate in the Mel-spectrogram
 NFFT = 1024                                         # Number of FFT components for the STFT process
 HOP_LENGTH = 256                                    # Number of samples between successive frames in the STFT
-AUDIO_LENGTH = 16000                                # Set for static axes. Length of the audio input signal in samples.
-MAX_SIGNAL_LENGTH = 2048                            # Maximum number of frames for the audio length after STFT processed.
+INPUT_AUDIO_LENGTH = 16000                          # Set for static axes. Length of the audio input signal in samples.
+MAX_SIGNAL_LENGTH = 2048                            # Maximum number of frames for the audio length after STFT processed. Set a appropriate larger value for long audio input, such as 4096.
 WINDOW_TYPE = 'kaiser'                              # Type of window function used in the STFT
 PAD_MODE = 'reflect'                                # Select reflect or constant
 STFT_TYPE = "stft_A"                                # stft_A: output real_part only;  stft_B: outputs real_part & imag_part
@@ -18,8 +17,14 @@ ISTFT_TYPE = "istft_A"                              # istft_A: Inputs = [magnitu
 export_path_stft = f"{STFT_TYPE}.onnx"              # The exported stft onnx model save path.
 export_path_istft = f"{ISTFT_TYPE}.onnx"            # The exported istft onnx model save path.
 
+
 HALF_NFFT = NFFT // 2
-SIGNAL_LENGTH = AUDIO_LENGTH // HOP_LENGTH + 1      # The audio length after STFT processed.
+STFT_SIGNAL_LENGTH = INPUT_AUDIO_LENGTH // HOP_LENGTH + 1   # The length after STFT processed
+if NFFT > INPUT_AUDIO_LENGTH:
+    NFFT = INPUT_AUDIO_LENGTH
+if HOP_LENGTH > INPUT_AUDIO_LENGTH:
+    HOP_LENGTH = INPUT_AUDIO_LENGTH
+
 
 # Initialize window
 WINDOW = {
@@ -68,9 +73,12 @@ class STFT_Process(torch.nn.Module):
             inverse_basis = window * torch.linalg.pinv((fourier_basis * self.n_fft) / self.hop_len).T[:, None, :]
             n = self.n_fft + self.hop_len * (self.max_frames - 1)
             window_sum = torch.zeros(n, dtype=torch.float32)
-            win_sq = librosa_util.normalize(window.numpy(), norm=None) ** 2
-            win_sq = librosa_util.pad_center(win_sq, size=self.n_fft)
-            win_sq = torch.from_numpy(win_sq).float()
+            window_normalized = window / window.abs().max()
+            total_pad = self.n_fft - window_normalized.shape[0]
+            pad_left = total_pad // 2
+            pad_right = total_pad - pad_left
+            win_sq = torch.nn.functional.pad(window_normalized ** 2, (pad_left, pad_right), mode='constant', value=0)
+
             for i in range(self.max_frames):
                 sample = i * self.hop_len
                 window_sum[sample: min(n, sample + self.n_fft)] += win_sq[: max(0, min(self.n_fft, n - sample))]
@@ -195,7 +203,7 @@ def main():
     with torch.inference_mode():
         print("\nStart Export Custom STFT")
         stft_model = STFT_Process(model_type=STFT_TYPE).eval()
-        dummy_stft_input = torch.randn((1, 1, AUDIO_LENGTH), dtype=torch.float32)
+        dummy_stft_input = torch.randn((1, 1, INPUT_AUDIO_LENGTH), dtype=torch.float32)
         input_names = ['input_audio']
         dynamic_axes_stft = {input_names[0]: {2: 'audio_len'}}
         if STFT_TYPE == 'stft_A':
@@ -220,10 +228,10 @@ def main():
         istft_model = STFT_Process(model_type=ISTFT_TYPE).eval()
         dynamic_axes_istft = {}
         if ISTFT_TYPE == 'istft_A':
-            dummy_istft_input = tuple(torch.randn((1, HALF_NFFT + 1, SIGNAL_LENGTH), dtype=torch.float32) for _ in range(2))
+            dummy_istft_input = tuple(torch.randn((1, HALF_NFFT + 1, STFT_SIGNAL_LENGTH), dtype=torch.float32) for _ in range(2))
             input_names = ["magnitude", "phase"]
         else:
-            dummy_istft_input = tuple(torch.randn((1, HALF_NFFT + 1, SIGNAL_LENGTH), dtype=torch.float32) for _ in range(3))
+            dummy_istft_input = tuple(torch.randn((1, HALF_NFFT + 1, STFT_SIGNAL_LENGTH), dtype=torch.float32) for _ in range(3))
             input_names = ["magnitude", "real", "imag"]
             dynamic_axes_istft[input_names[2]] = {2: 'signal_len'}
         dynamic_axes_istft[input_names[0]] = {2: 'signal_len'}
