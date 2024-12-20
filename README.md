@@ -70,7 +70,7 @@ Export the STFT or ISTFT process in ONNX format.
 # 差异 Difference - Compared to torch.stft() and torch.istft()
 | OS | Device | Backend | Model | Window Type | Absloute Mean Difference | Real-Time Factor<br>Chunk_Size: 160000 or 10s |
 |:-------:|:-------:|:-------:|:-------:|:-------:|:-------:|:-------:|
-| Ubuntu-24.04 | Desktop | CPU<br>i5-7300HQ | stft_A<br>f32 | hann | 3.8566932e-05 | 0.0005 |
-| Ubuntu-24.04 | Desktop | CPU<br>i5-7300HQ | istft_A<br>f32 | hann | 1.348025e-05 | 0.0015 |
-| Ubuntu-24.04 | Desktop | CPU<br>i5-7300HQ | stft_B<br>f32 | hann | 3.82898753e-05 | 0.001 |
-| Ubuntu-24.04 | Desktop | CPU<br>i5-7300HQ | istft_B<br>f32 | hann | 1.2795282e-05 | 0.003 |
+| Ubuntu-24.04 | Laptop | CPU<br>i5-7300HQ | stft_A<br>f32 | hann | 3.8566932e-05 | 0.0005 |
+| Ubuntu-24.04 | Laptop | CPU<br>i5-7300HQ | istft_A<br>f32 | hann | 1.348025e-05 | 0.0015 |
+| Ubuntu-24.04 | Laptop | CPU<br>i5-7300HQ | stft_B<br>f32 | hann | 3.82898753e-05 | 0.001 |
+| Ubuntu-24.04 | Laptop | CPU<br>i5-7300HQ | istft_B<br>f32 | hann | 1.2795282e-05 | 0.003 |
