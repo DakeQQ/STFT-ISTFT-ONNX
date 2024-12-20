@@ -134,6 +134,7 @@ class STFT_Process(torch.nn.Module):
         output = inverse_transform[:, :, self.half_n_fft: -self.half_n_fft] * self.window_sum_inv[self.half_n_fft: inverse_transform.size(-1) - self.half_n_fft]
         return output
 
+
 def test_onnx_stft_A(input_signal):
     torch_stft_output = torch.view_as_real(torch.stft(
         input_signal.squeeze(0),
@@ -151,6 +152,7 @@ def test_onnx_stft_A(input_signal):
     onnx_stft_real = ort_session.run(None, ort_inputs)[0].squeeze()
     mean_diff_real = np.abs(pytorch_stft_real - onnx_stft_real).mean()
     print("\nSTFT Result: Mean Difference =", mean_diff_real)
+
 
 def test_onnx_stft_B(input_signal):
     torch_stft_output = torch.view_as_real(torch.stft(
@@ -175,6 +177,7 @@ def test_onnx_stft_B(input_signal):
     mean_diff = (mean_diff_real + mean_diff_imag) * 0.5
     print("\nSTFT Result: Mean Difference =", mean_diff)
 
+
 def test_onnx_istft_A(magnitude, phase):
     complex_spectrum = torch.polar(magnitude, phase)
     pytorch_istft = torch.istft(complex_spectrum, n_fft=NFFT, hop_length=HOP_LENGTH, window=WINDOW).squeeze().numpy()
@@ -185,6 +188,7 @@ def test_onnx_istft_A(magnitude, phase):
     }
     onnx_istft = ort_session.run(None, ort_inputs)[0].squeeze()
     print("\nISTFT Result: Mean Difference =", np.abs(onnx_istft - pytorch_istft).mean())
+
 
 def test_onnx_istft_B(magnitude, real, imag):
     phase = torch.atan2(imag, real)
@@ -198,6 +202,7 @@ def test_onnx_istft_B(magnitude, real, imag):
     }
     onnx_istft = ort_session.run(None, ort_inputs)[0].squeeze()
     print("\nISTFT Result: Mean Difference =", np.abs(onnx_istft - pytorch_istft).mean())
+
 
 def main():
     with torch.inference_mode():
