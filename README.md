@@ -110,8 +110,8 @@ N_MELS = 100                  # 用于梅尔频谱图的梅尔频带数量。
 NFFT = 512                    # STFT 过程中的 FFT 组件数。
 HOP_LENGTH = 128              # STFT 中连续帧之间的样本数。
 SAMPLE_RATE = 16000           # 目标采样率。
-STFT_TYPE = "stft_B"            # stft_A: 仅输出实部；stft_B: 输出实部和虚部
-ISTFT_TYPE = "istft_B"          # istft_A: 输入 = [幅度, 相位]; istft_B: 输入 = [幅度, 实部, 虚部]，虚部的数据类型为浮点格式。
+STFT_TYPE = "stft_B"          # stft_A: 仅输出实部；stft_B: 输出实部和虚部
+ISTFT_TYPE = "istft_B"        # istft_A: 输入 = [幅度, 相位]; istft_B: 输入 = [幅度, 实部, 虚部]，虚部的数据类型为浮点格式。
 
 test_audio = './audio_file.mp3'
 
