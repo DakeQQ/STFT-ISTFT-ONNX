@@ -4,9 +4,13 @@ Export the Short-Time Fourier Transform (STFT) or Inverse Short-Time Fourier Tra
 ## Introduction
 This repository provides tools to export your custom STFT or ISTFT processes in ONNX format. Follow the Python script instructions and configure the parameters as needed.
 
-## Usage
-Below is an example of how to use this library:
+## Key Features
+- Export STFT and ISTFT processes in ONNX format.
+- Supports configurable parameters for audio processing, including window type, FFT components, and Mel bands.
+- Provides high accuracy compared to PyTorch's native STFT/ISTFT methods.
 
+## Below is an example of how to use this library:
+---
 ```python
 from STFT_Process import STFT_Process
 from pydub import AudioSegment
@@ -81,22 +85,19 @@ audio_reconstructed = custom_istft(magnitude, real_part, imag_part)
 
 ---
 
-## Key Features
-- Export STFT and ISTFT processes in ONNX format.
-- Supports configurable parameters for audio processing, including window type, FFT components, and Mel bands.
-- Provides high accuracy compared to PyTorch's native STFT/ISTFT methods.
-
----
-
 # STFT-ISTFT-ONNX
 将短时傅里叶变换（STFT）或逆短时傅里叶变换（ISTFT）过程导出为 ONNX 格式。
 
 ## 介绍
 本仓库提供了将自定义 STFT 或 ISTFT 过程导出为 ONNX 格式的工具。请按照 Python 脚本的说明操作，并根据需要配置参数。
 
-## 使用方法
-以下是使用此库的示例：
+## 主要特点
+- 将 STFT 和 ISTFT 过程导出为 ONNX 格式。
+- 支持音频处理参数的自定义，包括窗口类型、FFT 组件和梅尔频带数量。
+- 与 PyTorch 原生 STFT/ISTFT 方法相比，提供高精度结果。
 
+## 以下是使用此库的示例
+---
 ```python
 from STFT_Process import STFT_Process
 from pydub import AudioSegment
@@ -155,11 +156,4 @@ custom_istft = STFT_Process(
 # 从幅值和相位重建音频
 audio_reconstructed = custom_istft(magnitude, real_part, imag_part)
 ```
----
-
-## 主要特点
-- 将 STFT 和 ISTFT 过程导出为 ONNX 格式。
-- 支持音频处理参数的自定义，包括窗口类型、FFT 组件和梅尔频带数量。
-- 与 PyTorch 原生 STFT/ISTFT 方法相比，提供高精度结果。
-
 ---
