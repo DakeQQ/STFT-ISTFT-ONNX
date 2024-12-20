@@ -110,6 +110,8 @@ N_MELS = 100                  # 用于梅尔频谱图的梅尔频带数量。
 NFFT = 512                    # STFT 过程中的 FFT 组件数。
 HOP_LENGTH = 128              # STFT 中连续帧之间的样本数。
 SAMPLE_RATE = 16000           # 目标采样率。
+STFT_TYPE = "stft_B"            # stft_A: 仅输出实部；stft_B: 输出实部和虚部
+ISTFT_TYPE = "istft_B"          # istft_A: 输入 = [幅度, 相位]; istft_B: 输入 = [幅度, 实部, 虚部]，虚部的数据类型为浮点格式。
 
 test_audio = './audio_file.mp3'
 
@@ -126,7 +128,7 @@ audio_parts = audio[:, :, :INPUT_AUDIO_LENGTH]
 
 # 创建 STFT 模型
 custom_stft = STFT_Process(
-    model_type='stft_B', 
+    model_type=STFT_TYPE, 
     n_fft=NFFT, 
     n_mels=N_MELS, 
     hop_len=HOP_LENGTH, 
@@ -142,7 +144,7 @@ magnitude = torch.sqrt(real_part**2 + imag_part**2)
 
 # 创建 ISTFT 模型
 custom_istft = STFT_Process(
-    model_type='istft_B', 
+    model_type=ISTFT_TYPE, 
     n_fft=NFFT, 
     n_mels=N_MELS, 
     hop_len=HOP_LENGTH, 
@@ -161,5 +163,3 @@ audio_reconstructed = custom_istft(magnitude, real_part, imag_part)
 - 与 PyTorch 原生 STFT/ISTFT 方法相比，提供高精度结果。
 
 ---
-
-
