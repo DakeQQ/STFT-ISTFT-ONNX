@@ -54,7 +54,7 @@ custom_stft = STFT_Process(
 # Process the audio (STFT)
 real_part, imag_part = custom_stft(audio_parts, pad_mode='constant')  # pad_mode options: ['constant', 'reflect']
 
-# Calculate the magnitude (optional)
+# Calculate the magnitude
 magnitude = torch.sqrt(real_part**2 + imag_part**2)
 
 # Create the ISTFT model
@@ -140,7 +140,7 @@ custom_stft = STFT_Process(
 # 处理音频（STFT）
 real_part, imag_part = custom_stft(audio_parts, pad_mode='constant')  # pad_mode 选项：['constant', 'reflect']
 
-# 计算幅值（可选）
+# 计算幅值
 magnitude = torch.sqrt(real_part**2 + imag_part**2)
 
 # 创建 ISTFT 模型
