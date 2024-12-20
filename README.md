@@ -54,7 +54,7 @@ Export the STFT or ISTFT process in ONNX format.
 # 差异 Difference - Compared to torch.stft() and torch.istft()
 | OS | Device | Backend | Model | Window Type | Absloute Mean Difference |
 |:-------:|:-------:|:-------:|:-------:|:-------:|:-------:|
-| Ubuntu-24.04 | Desktop | CPU<br>i3-12300 | stft_A | hann | 3.8566932e-05 |
-| Ubuntu-24.04 | Desktop | CPU<br>i3-12300 | istft_A | hann | 1.348025e-05 |
-| Ubuntu-24.04 | Desktop | CPU<br>i3-12300 | stft_B | hann | 3.82898753e-05 |
-| Ubuntu-24.04 | Desktop | CPU<br>i3-12300 | istft_B | hann | 1.2795282e-05 |
+| Ubuntu-24.04 | Desktop | CPU<br>i3-12300 | stft_A<br>f32 | hann | 3.8566932e-05 |
+| Ubuntu-24.04 | Desktop | CPU<br>i3-12300 | istft_A<br>f32 | hann | 1.348025e-05 |
+| Ubuntu-24.04 | Desktop | CPU<br>i3-12300 | stft_B<br>f32 | hann | 3.82898753e-05 |
+| Ubuntu-24.04 | Desktop | CPU<br>i3-12300 | istft_B<br>f32 | hann | 1.2795282e-05 |
