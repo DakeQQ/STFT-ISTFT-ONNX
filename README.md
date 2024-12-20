@@ -4,6 +4,7 @@ Export the STFT or ISTFT process in ONNX format.
 2. The usage method is as follows:
    ```
    from STFT_Process import STFT_Process
+   from pydub import AudioSegment
 
    MAX_SIGNAL_LENGTH = 1024                # Max frames for audio length after STFT processed. Set a appropriate larger value for long audio input, such as 4096.
    INPUT_AUDIO_LENGTH = 5120               # Set for static axis export: the length of the audio input signal (in samples). It is better to set an integer multiple of the NFFT value.
@@ -11,7 +12,14 @@ Export the STFT or ISTFT process in ONNX format.
    N_MELS = 100                            # Number of Mel bands to generate in the Mel-spectrogram
    NFFT = 512                              # Number of FFT components for the STFT process
    HOP_LENGTH = 128                        # Number of samples between successive frames in the STFT
-   
+   SAMPLE_RATE = 16000                     # The target sample rate.
+
+   test_audio = r'./audio_file.mp3'
+
+   # Load the audio
+   audio = torch.tensor(AudioSegment.from_file(test_audio).set_channels(1).set_frame_rate(SAMPLE_RATE).get_array_of_samples(), dtype=torch.float32) / 32768.0
+   audio = audio.reshape(1, 1, -1)
+   audio = audio[:, :, :INPUT_AUDIO_LENGTH]
 
    # Create the stft model, The stft_A output the real_part only.
    custom_stft = STFT_Process(model_type='stft_B', n_fft=NFFT, n_mels=N_MELS, hop_len=HOP_LENGTH, max_frames=0, window_type=WINDOW_TYPE).eval()
@@ -39,6 +47,7 @@ Export the STFT or ISTFT process in ONNX format.
 2. 使用方法如下：
    ```
    from STFT_Process import STFT_Process
+   from pydub import AudioSegment
 
    MAX_SIGNAL_LENGTH = 1024                # Max frames for audio length after STFT processed. Set a appropriate larger value for long audio input, such as 4096.
    INPUT_AUDIO_LENGTH = 5120               # Set for static axis export: the length of the audio input signal (in samples). It is better to set an integer multiple of the NFFT value.
@@ -46,22 +55,29 @@ Export the STFT or ISTFT process in ONNX format.
    N_MELS = 100                            # Number of Mel bands to generate in the Mel-spectrogram
    NFFT = 512                              # Number of FFT components for the STFT process
    HOP_LENGTH = 128                        # Number of samples between successive frames in the STFT
-   
-   
+   SAMPLE_RATE = 16000                     # The target sample rate.
+
+   test_audio = r'./audio_file.mp3'
+
+   # Load the audio
+   audio = torch.tensor(AudioSegment.from_file(test_audio).set_channels(1).set_frame_rate(SAMPLE_RATE).get_array_of_samples(), dtype=torch.float32) / 32768.0
+   audio = audio.reshape(1, 1, -1)
+   audio = audio[:, :, :INPUT_AUDIO_LENGTH]
+
    # Create the stft model, The stft_A output the real_part only.
    custom_stft = STFT_Process(model_type='stft_B', n_fft=NFFT, n_mels=N_MELS, hop_len=HOP_LENGTH, max_frames=0, window_type=WINDOW_TYPE).eval()
-   
+
    # Process the audio
    real_part, imag_part = self.stft_model(audio, 'constant')  # pad mode = ['constant', 'reflect'];
    
    #______________________________________________________________________________________________________________________________________________
-   
+
    # Create the istft model, The istft_A accept magnitude and phase as input.
    custom_istft = STFT_Process(model_type='istft_B', n_fft=NFFT, n_mels=N_MELS, hop_len=HOP_LENGTH, max_frames=MAX_SIGNAL_LENGTH, window_type=WINDOW_TYPE).eval()
-   
+
    # Calculate the magnitude
    magnitude = torch.sqrt(real_part * real_part + imag_part * imag_part)
-   
+
    # Convert it back to the audio.
    audio = self.istft_model(magnitude, real_part, imag_part)
 
