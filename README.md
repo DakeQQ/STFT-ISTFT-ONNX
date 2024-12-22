@@ -42,7 +42,6 @@ audio = torch.tensor(
     dtype=torch.float32
 )
 audio = audio.reshape(1, 1, -1)
-
 audio_parts = audio[:, :, :INPUT_AUDIO_LENGTH]
 
 # Create the STFT model
