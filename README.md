@@ -25,7 +25,7 @@ save_reconstructed_audio = './saved_audio.wav'      # Save the reconstructed.
 # Configuration Parameters
 MAX_SIGNAL_LENGTH = 1024        # Maximum number of frames for audio length after STFT. Use larger values for long audio inputs (e.g., 4096).
 INPUT_AUDIO_LENGTH = 5120       # Length of the audio input signal (in samples) for static axis export. Should be a multiple of NFFT.
-WINDOW_TYPE = 'hann'            # Type of window function used in the STFT.
+WINDOW_TYPE = 'hann'            # Type of window function used in the STFT.  Support: ['bartlett', 'blackman', 'hamming', 'hann', 'kaiser']
 N_MELS = 100                    # Number of Mel bands for the Mel-spectrogram.
 NFFT = 512                      # Number of FFT components for the STFT process.
 HOP_LENGTH = 128                # Number of samples between successive frames in the STFT.
@@ -116,7 +116,7 @@ save_reconstructed_audio = './saved_audio.wav'      # Save the reconstructed.
 # 配置参数
 MAX_SIGNAL_LENGTH = 1024      # STFT 处理后音频的最大帧数。对于长音频输入，请使用更大的值（例如 4096）。
 INPUT_AUDIO_LENGTH = 5120     # 用于静态轴导出的音频输入信号长度（以样本为单位）。最好设置为 NFFT 的整数倍。
-WINDOW_TYPE = 'hann'          # STFT 中使用的窗口函数类型。
+WINDOW_TYPE = 'hann'          # STFT 中使用的窗口函数类型。Support: ['bartlett', 'blackman', 'hamming', 'hann', 'kaiser']
 N_MELS = 100                  # 用于梅尔频谱图的梅尔频带数量。
 NFFT = 512                    # STFT 过程中的 FFT 组件数。
 HOP_LENGTH = 128              # STFT 中连续帧之间的样本数。
