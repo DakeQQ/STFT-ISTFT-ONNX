@@ -50,7 +50,7 @@ custom_stft = STFT_Process(
     n_fft=NFFT, 
     n_mels=N_MELS, 
     hop_len=HOP_LENGTH, 
-    max_frames=0, 
+    max_frames=0,  # Not important here.
     window_type=WINDOW_TYPE
 ).eval()
 
@@ -143,7 +143,7 @@ custom_stft = STFT_Process(
     n_fft=NFFT, 
     n_mels=N_MELS, 
     hop_len=HOP_LENGTH, 
-    max_frames=0, 
+    max_frames=0,  # Not important here.
     window_type=WINDOW_TYPE
 ).eval()
 
