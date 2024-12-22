@@ -79,7 +79,6 @@ sf.write(save_reconstructed_audio, audio_reconstructed.reshape(-1), SAMPLE_RATE,
 
 ## 比较差异 Comparison to `torch.stft()` and `torch.istft()`
 
-### Performance Metrics
 | OS            | Device       | Backend    | Model       | Window Type | Absolute Mean Difference | Real-Time Factor<br>Chunk Size: 160,000 or 10s |
 |:-------------:|:------------:|:----------:|:-----------:|:-----------:|:-------------------------:|:--------------------------------------------:|
 | Ubuntu 24.04  | Laptop       | CPU i5-7300HQ | `stft_A` f32 | `hann`      | 3.8567e-05               | 0.0005                                       |
