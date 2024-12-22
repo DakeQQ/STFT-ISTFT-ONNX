@@ -15,8 +15,12 @@ This repository provides tools to export your custom STFT or ISTFT processes in 
 from STFT_Process import STFT_Process
 from pydub import AudioSegment
 import torch
+import soundfile as sf
 
-test_audio = './audio_file.mp3' # Specify the path to your audio file.
+
+test_audio = './audio_file.mp3'                     # Specify the path to your audio file.
+save_reconstructed_audio = './saved_audio.wav'      # Save the reconstructed.
+
 
 # Configuration Parameters
 MAX_SIGNAL_LENGTH = 1024        # Maximum number of frames for audio length after STFT. Use larger values for long audio inputs (e.g., 4096).
@@ -36,7 +40,7 @@ audio = torch.tensor(
     .set_frame_rate(SAMPLE_RATE)
     .get_array_of_samples(), 
     dtype=torch.float32
-) / 32768.0
+)
 audio = audio.reshape(1, 1, -1)
 
 audio_parts = audio[:, :, :INPUT_AUDIO_LENGTH]
@@ -68,7 +72,8 @@ custom_istft = STFT_Process(
 ).eval()
 
 # Reconstruct the audio from magnitude and phase
-audio_reconstructed = custom_istft(magnitude, real_part, imag_part)
+audio_reconstructed = custom_istft(magnitude, real_part, imag_part).to(torch.int16)
+sf.write(save_reconstructed_audio, audio_reconstructed[0, 0], SAMPLE_RATE, format='WAVEX')
 ```
 
 ---
@@ -102,6 +107,12 @@ audio_reconstructed = custom_istft(magnitude, real_part, imag_part)
 from STFT_Process import STFT_Process
 from pydub import AudioSegment
 import torch
+import soundfile as sf
+
+
+test_audio = './audio_file.mp3'                     # Input a test.
+save_reconstructed_audio = './saved_audio.wav'      # Save the reconstructed.
+
 
 # 配置参数
 MAX_SIGNAL_LENGTH = 1024      # STFT 处理后音频的最大帧数。对于长音频输入，请使用更大的值（例如 4096）。
@@ -114,7 +125,7 @@ SAMPLE_RATE = 16000           # 目标采样率。
 STFT_TYPE = "stft_B"          # stft_A: 仅输出实部；stft_B: 输出实部和虚部
 ISTFT_TYPE = "istft_B"        # istft_A: 输入 = [幅度, 相位]; istft_B: 输入 = [幅度, 实部, 虚部]，虚部的数据类型为浮点格式。
 
-test_audio = './audio_file.mp3'
+
 
 # 加载音频
 audio = torch.tensor(
@@ -123,7 +134,7 @@ audio = torch.tensor(
     .set_frame_rate(SAMPLE_RATE)
     .get_array_of_samples(), 
     dtype=torch.float32
-) / 32768.0
+)
 audio = audio.reshape(1, 1, -1)
 audio_parts = audio[:, :, :INPUT_AUDIO_LENGTH]
 
@@ -154,6 +165,7 @@ custom_istft = STFT_Process(
 ).eval()
 
 # 从幅值和相位重建音频
-audio_reconstructed = custom_istft(magnitude, real_part, imag_part)
+audio_reconstructed = custom_istft(magnitude, real_part, imag_part).to(torch.int16)
+sf.write(save_reconstructed_audio, audio_reconstructed[0, 0], SAMPLE_RATE, format='WAVEX')
 ```
 ---
