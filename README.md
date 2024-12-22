@@ -72,7 +72,7 @@ custom_istft = STFT_Process(
 
 # Reconstruct the audio from magnitude and phase
 audio_reconstructed = custom_istft(magnitude, real_part, imag_part).to(torch.int16)
-sf.write(save_reconstructed_audio, audio_reconstructed[0, 0], SAMPLE_RATE, format='WAVEX')
+sf.write(save_reconstructed_audio, audio_reconstructed.reshape(-1), SAMPLE_RATE, format='WAVEX')
 ```
 
 ---
@@ -165,6 +165,6 @@ custom_istft = STFT_Process(
 
 # 从幅值和相位重建音频
 audio_reconstructed = custom_istft(magnitude, real_part, imag_part).to(torch.int16)
-sf.write(save_reconstructed_audio, audio_reconstructed[0, 0], SAMPLE_RATE, format='WAVEX')
+sf.write(save_reconstructed_audio, audio_reconstructed.reshape(-1), SAMPLE_RATE, format='WAVEX')
 ```
 ---
