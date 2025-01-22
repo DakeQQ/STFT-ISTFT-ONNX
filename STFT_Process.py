@@ -5,7 +5,6 @@ import torch
 # To export your own STFT process ONNX model, set the following values.
 
 DYNAMIC_AXES = True                                 # Default dynamic axes is input audio (signal) length.
-N_MELS = 100                                        # Number of Mel bands to generate in the Mel-spectrogram
 NFFT = 1024                                         # Number of FFT components for the STFT process
 HOP_LENGTH = 256                                    # Number of samples between successive frames in the STFT
 INPUT_AUDIO_LENGTH = 16000                          # Set for static axes. Length of the audio input signal in samples.
@@ -38,11 +37,10 @@ WINDOW = {
 
 
 class STFT_Process(torch.nn.Module):
-    def __init__(self, model_type, n_fft=NFFT, n_mels=N_MELS, hop_len=HOP_LENGTH, max_frames=MAX_SIGNAL_LENGTH, window_type=WINDOW_TYPE):
+    def __init__(self, model_type, n_fft=NFFT, hop_len=HOP_LENGTH, max_frames=MAX_SIGNAL_LENGTH, window_type=WINDOW_TYPE):
         super(STFT_Process, self).__init__()
         self.model_type = model_type
         self.n_fft = n_fft
-        self.n_mels = n_mels
         self.hop_len = hop_len
         self.max_frames = max_frames
         self.window_type = window_type
