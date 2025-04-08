@@ -2,7 +2,8 @@ import numpy as np
 import onnxruntime as ort
 import torch
 
-# To export your own STFT process ONNX model, set the following values.
+# To export your own STFT process ONNX model, set the following values. 
+# Next, click the IDE Run button or Launch the cmd to run 'python STFT_Process.py'
 
 DYNAMIC_AXES = True                                 # Default dynamic axes is input audio (signal) length.
 NFFT = 1024                                         # Number of FFT components for the STFT process
@@ -78,8 +79,8 @@ class STFT_Process(torch.nn.Module):
             ]).float()
             
             # Create forward and inverse basis
-            forward_basis = window * fourier_basis[:, None, :]
-            inverse_basis = window * torch.linalg.pinv((fourier_basis * n_fft) / hop_len).T[:, None, :]
+            forward_basis = window * fourier_basis.unsqueeze(1)
+            inverse_basis = window * torch.linalg.pinv((fourier_basis * n_fft) / hop_len).T.unsqueeze(1)
             
             # Calculate window sum for overlap-add
             n = n_fft + hop_len * (max_frames - 1)
@@ -103,7 +104,7 @@ class STFT_Process(torch.nn.Module):
             # Register buffers
             self.register_buffer("forward_basis", forward_basis)
             self.register_buffer("inverse_basis", inverse_basis)
-            self.register_buffer("window_sum_inv", n_fft / (window_sum * hop_len + 1e-8))  # Add epsilon to avoid division by zero
+            self.register_buffer("window_sum_inv", n_fft / (window_sum * hop_len + 1e-7))  # Add epsilon to avoid division by zero
 
     def forward(self, *args):
         # Use direct method calls instead of if-else cascade for better ONNX export
