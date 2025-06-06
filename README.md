@@ -27,7 +27,8 @@ MAX_SIGNAL_LENGTH = 1024        # Maximum number of frames for audio length afte
 INPUT_AUDIO_LENGTH = 5120       # Length of the audio input signal (in samples) for static axis export. Should be a multiple of NFFT.
 WINDOW_TYPE = 'hann'            # Type of window function used in the STFT.  Support: ['bartlett', 'blackman', 'hamming', 'hann', 'kaiser']
 NFFT = 512                      # Number of FFT components for the STFT process.
-HOP_LENGTH = 128                # Number of samples between successive frames in the STFT.
+WINDOW_LENGTH                   # Length of windowing.
+HOP_LENGTH = 160                # Number of samples between successive frames in the STFT.
 SAMPLE_RATE = 16000             # Target sample rate.
 STFT_TYPE = "stft_B"            # stft_A: output real_part only;  stft_B: outputs real_part & imag_part
 ISTFT_TYPE = "istft_B"          # istft_A: Inputs = [magnitude, phase];  istft_B: Inputs = [magnitude, real_part, imag_part], The dtype of imag_part is float format.
@@ -46,7 +47,8 @@ audio_parts = audio[:, :, :INPUT_AUDIO_LENGTH]
 # Create the STFT model
 custom_stft = STFT_Process(
     model_type=STFT_TYPE, 
-    n_fft=NFFT, 
+    n_fft=NFFT,
+    win_length=WIN_LENGTH,
     hop_len=HOP_LENGTH, 
     max_frames=0,  # Not important here.
     window_type=WINDOW_TYPE
@@ -61,7 +63,8 @@ magnitude = torch.sqrt(real_part**2 + imag_part**2)
 # Create the ISTFT model
 custom_istft = STFT_Process(
     model_type=ISTFT_TYPE, 
-    n_fft=NFFT, 
+    n_fft=NFFT,
+    win_length=WIN_LENGTH,
     hop_len=HOP_LENGTH, 
     max_frames=MAX_SIGNAL_LENGTH, 
     window_type=WINDOW_TYPE
