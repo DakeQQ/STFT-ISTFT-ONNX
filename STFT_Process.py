@@ -5,18 +5,18 @@ import torch
 # To export your own STFT process ONNX model, set the following values.
 # Next, click the IDE Run button or Launch the cmd to run 'python STFT_Process.py'
 
-DYNAMIC_AXES = True  # Default dynamic axes is input audio (signal) length.
-NFFT = 512  # Number of FFT components for the STFT process
-WIN_LENGTH = 400  # Length of the window function (can be different from NFFT)
-HOP_LENGTH = 160  # Number of samples between successive frames in the STFT
+DYNAMIC_AXES = True         # Default dynamic axes is input audio (signal) length.
+NFFT = 512                  # Number of FFT components for the STFT process
+WIN_LENGTH = 400            # Length of the window function (can be different from NFFT)
+HOP_LENGTH = 160            # Number of samples between successive frames in the STFT
 INPUT_AUDIO_LENGTH = 16000  # Set for static axes. Length of the audio input signal in samples.
-MAX_SIGNAL_LENGTH = 2048  # Maximum number of frames for the audio length after STFT processed. Set a appropriate larger value for long audio input, such as 4096.
-WINDOW_TYPE = 'kaiser'  # Type of window function used in the STFT
-PAD_MODE = 'reflect'  # Select reflect or constant
-STFT_TYPE = "stft_A"  # stft_A: output real_part only;  stft_B: outputs real_part & imag_part
-ISTFT_TYPE = "istft_A"  # istft_A: Inputs = [magnitude, phase];  istft_B: Inputs = [magnitude, real_part, imag_part], The dtype of imag_part is float format.
-export_path_stft = f"{STFT_TYPE}.onnx"  # The exported stft onnx model save path.
-export_path_istft = f"{ISTFT_TYPE}.onnx"  # The exported istft onnx model save path.
+MAX_SIGNAL_LENGTH = 2048    # Maximum number of frames for the audio length after STFT processed. Set a appropriate larger value for long audio input, such as 4096.
+WINDOW_TYPE = 'kaiser'      # Type of window function used in the STFT
+PAD_MODE = 'reflect'        # Select reflect or constant
+STFT_TYPE = "stft_A"        # stft_A: output real_part only;  stft_B: outputs real_part & imag_part
+ISTFT_TYPE = "istft_A"      # istft_A: Inputs = [magnitude, phase];  istft_B: Inputs = [magnitude, real_part, imag_part], The dtype of imag_part is float format.
+export_path_stft = f"{STFT_TYPE}.onnx"      # The exported stft onnx model save path.
+export_path_istft = f"{ISTFT_TYPE}.onnx"    # The exported istft onnx model save path.
 
 # Precompute constants to avoid calculations at runtime
 HALF_NFFT = NFFT // 2
