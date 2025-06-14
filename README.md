@@ -117,7 +117,8 @@ MAX_SIGNAL_LENGTH = 1024      # STFT 处理后音频的最大帧数。对于长�
 INPUT_AUDIO_LENGTH = 5120     # 用于静态轴导出的音频输入信号长度（以样本为单位）。最好设置为 NFFT 的整数倍。
 WINDOW_TYPE = 'hann'          # STFT 中使用的窗口函数类型。Support: ['bartlett', 'blackman', 'hamming', 'hann', 'kaiser']
 NFFT = 512                    # STFT 过程中的 FFT 组件数。
-HOP_LENGTH = 128              # STFT 中连续帧之间的样本数。
+WINDOW_LENGTH = 400           # 窗口的长度。
+HOP_LENGTH = 160              # STFT 中连续帧之间的样本数。
 SAMPLE_RATE = 16000           # 目标采样率。
 STFT_TYPE = "stft_B"          # stft_A: 仅输出实部；stft_B: 输出实部和虚部
 ISTFT_TYPE = "istft_B"        # istft_A: 输入 = [幅度, 相位]; istft_B: 输入 = [幅度, 实部, 虚部]，虚部的数据类型为浮点格式。
@@ -138,7 +139,8 @@ audio_parts = audio[:, :, :INPUT_AUDIO_LENGTH]
 # 创建 STFT 模型
 custom_stft = STFT_Process(
     model_type=STFT_TYPE, 
-    n_fft=NFFT, 
+    n_fft=NFFT,
+    win_length=WINDOW_LENGTH,
     hop_len=HOP_LENGTH, 
     max_frames=0,  # Not important here.
     window_type=WINDOW_TYPE
@@ -153,7 +155,8 @@ magnitude = torch.sqrt(real_part**2 + imag_part**2)
 # 创建 ISTFT 模型
 custom_istft = STFT_Process(
     model_type=ISTFT_TYPE, 
-    n_fft=NFFT, 
+    n_fft=NFFT,
+    win_length=WINDOW_LENGTH,
     hop_len=HOP_LENGTH, 
     max_frames=MAX_SIGNAL_LENGTH, 
     window_type=WINDOW_TYPE
