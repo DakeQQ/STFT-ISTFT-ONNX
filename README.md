@@ -31,7 +31,7 @@ WINDOW_LENGTH = 400             # Length of windowing.
 HOP_LENGTH = 160                # Number of samples between successive frames in the STFT.
 SAMPLE_RATE = 16000             # Target sample rate.
 STFT_TYPE = "stft_B"            # stft_A: output real_part only;  stft_B: outputs real_part & imag_part
-ISTFT_TYPE = "istft_B"          # istft_A: Inputs = [magnitude, phase];  istft_B: Inputs = [magnitude, real_part, imag_part], The dtype of imag_part is float format.
+ISTFT_TYPE = "istft_B"          # istft_A: Inputs = [magnitude, phase];  istft_B: Inputs = [real_part, imag_part], The dtype of imag_part is float format.
 
 # Load the audio
 audio = torch.tensor(
@@ -57,9 +57,6 @@ custom_stft = STFT_Process(
 # Process the audio (STFT)
 real_part, imag_part = custom_stft(audio_parts, 'constant')  # pad_mode options: ['constant', 'reflect']
 
-# Calculate the magnitude
-magnitude = torch.sqrt(real_part**2 + imag_part**2)
-
 # Create the ISTFT model
 custom_istft = STFT_Process(
     model_type=ISTFT_TYPE, 
@@ -71,7 +68,7 @@ custom_istft = STFT_Process(
 ).eval()
 
 # Reconstruct the audio from magnitude and phase
-audio_reconstructed = custom_istft(magnitude, real_part, imag_part).to(torch.int16)
+audio_reconstructed = custom_istft(real_part, imag_part).to(torch.int16)
 sf.write(save_reconstructed_audio, audio_reconstructed.reshape(-1), SAMPLE_RATE, format='WAVEX')
 ```
 
@@ -121,7 +118,7 @@ WINDOW_LENGTH = 400           # 窗口的长度。
 HOP_LENGTH = 160              # STFT 中连续帧之间的样本数。
 SAMPLE_RATE = 16000           # 目标采样率。
 STFT_TYPE = "stft_B"          # stft_A: 仅输出实部；stft_B: 输出实部和虚部
-ISTFT_TYPE = "istft_B"        # istft_A: 输入 = [幅度, 相位]; istft_B: 输入 = [幅度, 实部, 虚部]，虚部的数据类型为浮点格式。
+ISTFT_TYPE = "istft_B"        # istft_A: 输入 = [幅度, 相位]; istft_B: 输入 = [实部, 虚部]，虚部的数据类型为浮点格式。
 
 
 
@@ -149,9 +146,6 @@ custom_stft = STFT_Process(
 # 处理音频（STFT）
 real_part, imag_part = custom_stft(audio_parts, 'constant')  # pad_mode 选项：['constant', 'reflect']
 
-# 计算幅值
-magnitude = torch.sqrt(real_part**2 + imag_part**2)
-
 # 创建 ISTFT 模型
 custom_istft = STFT_Process(
     model_type=ISTFT_TYPE, 
@@ -163,7 +157,7 @@ custom_istft = STFT_Process(
 ).eval()
 
 # 从幅值和相位重建音频
-audio_reconstructed = custom_istft(magnitude, real_part, imag_part).to(torch.int16)
+audio_reconstructed = custom_istft(real_part, imag_part).to(torch.int16)
 sf.write(save_reconstructed_audio, audio_reconstructed.reshape(-1), SAMPLE_RATE, format='WAVEX')
 ```
 ---
