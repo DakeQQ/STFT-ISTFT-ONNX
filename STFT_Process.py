@@ -16,7 +16,7 @@ MAX_SIGNAL_LENGTH   = 2048           # Maximum number of frames for the audio le
 WINDOW_TYPE         = 'hann'         # bartlett | blackman | hamming | hann | kaiser
 PAD_MODE            = 'constant'     # reflect | constant
 
-STFT_TYPE  = "stft_B"                # # stft_A: output real_part only;  stft_B: outputs real_part & imag_part
+STFT_TYPE  = "stft_B"                # stft_A: output real_part only;  stft_B: outputs real_part & imag_part
 ISTFT_TYPE = "istft_B"               # istft_A: Inputs = [magnitude, phase];  istft_B: Inputs = [real_part, imag_part], The dtype of imag_part is float format.
 
 export_path_stft  = f"{STFT_TYPE}.onnx"
