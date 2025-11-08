@@ -277,7 +277,7 @@ def main():
             stft_model, (dummy_audio,), export_path_stft,
             input_names=['input_audio'], output_names=out_names,
             dynamic_axes=dyn_axes_sft if DYNAMIC_AXES else None,
-            opset_version=17, do_constant_folding=True
+            opset_version=17, do_constant_folding=True, dynamo=False
         )
         # ─── ISTFT export ──────────────────────────────────────────────────
         istft_model = STFT_Process(ISTFT_TYPE, center_pad=CENTER_PAD).eval()
@@ -307,7 +307,7 @@ def main():
             istft_model, dummy_inp, export_path_istft,
             input_names=in_names, output_names=['output_audio'],
             dynamic_axes=dyn_axes_ist if DYNAMIC_AXES else None,
-            opset_version=17, do_constant_folding=True
+            opset_version=17, do_constant_folding=True, dynamo=False
         )
 
         # ─── quick comparisons ────────────────────────────────────────────
