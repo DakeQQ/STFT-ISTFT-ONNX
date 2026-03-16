@@ -160,8 +160,7 @@ class STFT_Process(torch.nn.Module):
         self.register_buffer('expected_len', expected_len)
 
         # Pre-allocated zero buffer for constant-pad centre mode.
-        if self.center_pad and self.pad_mode != 'reflect':
-            self.register_buffer('padding_zero', torch.zeros(1, 1, self.half_n_fft, dtype=torch.float32))
+        self.register_buffer('padding_zero', torch.zeros(1, 1, self.half_n_fft, dtype=torch.float32))
 
         # ── Build STFT convolution kernels ────────────────────────────────
         if model_type in ('stft_A', 'stft_B'):
