@@ -271,7 +271,11 @@ class STFT_Process(torch.nn.Module):
             return torch.cat([left, x, right], dim=2)
 
         # Constant (zero) padding.
-        return torch.cat([self.padding_zero, x, self.padding_zero], dim=2)
+        if x.shape[0] != 1:
+            padding_zero = torch.cat([self.padding_zero] * x.shape[0], dim=0)
+        else:
+            padding_zero = self.padding_zero
+        return torch.cat([padding_zero, x, padding_zero], dim=2)
 
     # --------------------------------------------------------------------- #
     #  STFT variants                                                        #
@@ -557,3 +561,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+  
