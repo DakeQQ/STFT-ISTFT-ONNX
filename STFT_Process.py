@@ -70,11 +70,13 @@ else:
 
 # -- Window function registry ----------------------------------------------
 WINDOW_FUNCTIONS = {
-    'bartlett': lambda L: torch.bartlett_window(L, periodic=True),
-    'blackman': lambda L: torch.blackman_window(L, periodic=True),
-    'hamming':  lambda L: torch.hamming_window(L,  periodic=True),
-    'hann':     lambda L: torch.hann_window(L,     periodic=True),
-    'kaiser':   lambda L: torch.kaiser_window(L,   periodic=True, beta=12.0)
+    'bartlett':  lambda L: torch.bartlett_window(L, periodic=True),
+    'blackman':  lambda L: torch.blackman_window(L, periodic=True),
+    'hamming':   lambda L: torch.hamming_window(L,  periodic=True),
+    'hann':      lambda L: torch.hann_window(L,     periodic=True),
+    'hann_sqrt': lambda L: torch.hann_window(L,     periodic=False).pow(0.5),
+    'povey':     lambda L: torch.hann_window(L,     periodic=False).pow(0.85),
+    'kaiser':    lambda L: torch.kaiser_window(L,   periodic=True, beta=12.0)
 }
 DEFAULT_WINDOW_FN = lambda L: torch.hann_window(L, periodic=True)
 
