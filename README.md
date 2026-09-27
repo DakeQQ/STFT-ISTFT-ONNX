@@ -48,8 +48,8 @@ Where `F = NFFT // 2 + 1` (one-sided frequency bins) and `T` is the number of fr
 
 1. **Prepare input**: Concatenate real and imaginary channels (or convert magnitude + phase to real + imag for `istft_A`).
 2. **ConvTranspose1d synthesis**: A transposed convolution with the inverse DFT basis (scaled by `2/N` for one-sided spectrum recovery, windowed) performs overlap-add synthesis.
-3. **COLA normalization**: Divide the reconstructed signal by the overlap-summed squared window to satisfy the Constant Overlap-Add (COLA) condition, ensuring perfect reconstruction.
-4. **Trim center padding**: If center padding was used during STFT, strip the padded edges from the output.
+3. **Overlap normalization**: With dynamic frame counts, compute the squared-window overlap sum at runtime and divide by it. With fixed frame counts, multiply by a precomputed reciprocal instead. Zero-overlap endpoints (for example, an uncentered Hann window) produce zero rather than a non-finite value.
+4. **Trim center padding**: If center padding was used during STFT, trim both edges using ConvTranspose1d padding.
 
 ---
 
@@ -60,7 +60,7 @@ Edit these at the top of `STFT_Process.py` before running the export:
 | Parameter            | Default     | Description                                                                 |
 |:---------------------|:-----------:|:----------------------------------------------------------------------------|
 | `DYNAMIC_AXES`       | `True`      | `True` → ONNX accepts variable-length audio; `False` → fixed length        |
-| `OPSET`              | `17`        | ONNX opset version                                                          |
+| `OPSET`              | `18`        | ONNX opset version                                                          |
 | `NFFT`               | `400`       | FFT size (number of frequency bins before folding)                          |
 | `WIN_LENGTH`         | `400`       | Analysis window length in samples (≤ `NFFT`)                               |
 | `HOP_LENGTH`         | `160`       | Hop size between successive frames                                          |
@@ -68,7 +68,6 @@ Edit these at the top of `STFT_Process.py` before running the export:
 | `CENTER_PAD`         | `True`      | Pad signal so frame centers align with sample indices                       |
 | `PAD_MODE`           | `'constant'`| Padding mode when `CENTER_PAD=True`: `'reflect'` or `'constant'`           |
 | `INPUT_AUDIO_LENGTH` | `16000`     | Waveform length (samples) for dummy tensors during export                   |
-| `MAX_SIGNAL_LENGTH`  | `2048`      | Upper-bound frame count for pre-allocated ISTFT buffers                     |
 | `STFT_TYPE`          | `'stft_B'`  | Which STFT variant to export                                                |
 | `ISTFT_TYPE`         | `'istft_B'` | Which ISTFT variant to export                                               |
 
@@ -86,6 +85,8 @@ This will:
 - Export `stft_B.onnx` and `istft_B.onnx` (or whichever variants are configured).
 - Print validation results comparing ONNX outputs against `torch.stft` / `torch.istft`.
 - Run a round-trip reconstruction test and report the mean absolute error.
+
+With `DYNAMIC_AXES=False`, the ISTFT export uses `STFT_SIGNAL_LENGTH` frames and a precomputed reciprocal overlap sum, replacing its runtime normalization convolution and division with multiplication. With `DYNAMIC_AXES=True`, it accepts variable frame counts and calculates normalization for each input. When constructing `STFT_Process` directly, set `dynamic_frames=False` and `max_frames` to the input frame count to select the fixed-frame path.
 
 **Dependencies:**
 ```
@@ -109,7 +110,6 @@ from STFT_Process import STFT_Process
 NFFT = 400
 WIN_LENGTH = 400
 HOP_LENGTH = 160
-MAX_SIGNAL_LENGTH = 1024
 WINDOW_TYPE = 'hann'
 
 # Load audio as a float32 tensor with shape (1, 1, num_samples)
@@ -121,7 +121,6 @@ stft_model = STFT_Process(
     n_fft=NFFT,
     win_length=WIN_LENGTH,
     hop_len=HOP_LENGTH,
-    max_frames=MAX_SIGNAL_LENGTH,
     window_type=WINDOW_TYPE
 ).eval()
 
@@ -135,7 +134,6 @@ istft_model = STFT_Process(
     n_fft=NFFT,
     win_length=WIN_LENGTH,
     hop_len=HOP_LENGTH,
-    max_frames=MAX_SIGNAL_LENGTH,
     window_type=WINDOW_TYPE
 ).eval()
 
@@ -191,7 +189,6 @@ NFFT = 512
 WIN_LENGTH = 400
 HOP_LENGTH = 160
 SAMPLE_RATE = 16000
-MAX_SIGNAL_LENGTH = 1024
 
 # Load audio
 audio = torch.tensor(
@@ -203,11 +200,11 @@ audio = torch.tensor(
 ).reshape(1, 1, -1)
 
 # STFT
-stft = STFT_Process('stft_B', n_fft=NFFT, win_length=WIN_LENGTH, hop_len=HOP_LENGTH, max_frames=MAX_SIGNAL_LENGTH).eval()
+stft = STFT_Process('stft_B', n_fft=NFFT, win_length=WIN_LENGTH, hop_len=HOP_LENGTH).eval()
 real, imag = stft(audio)
 
 # ISTFT
-istft = STFT_Process('istft_B', n_fft=NFFT, win_length=WIN_LENGTH, hop_len=HOP_LENGTH, max_frames=MAX_SIGNAL_LENGTH).eval()
+istft = STFT_Process('istft_B', n_fft=NFFT, win_length=WIN_LENGTH, hop_len=HOP_LENGTH).eval()
 reconstructed = istft(real, imag).to(torch.int16)
 
 sf.write('./reconstructed.wav', reconstructed.reshape(-1), SAMPLE_RATE, format='WAVEX')
@@ -321,8 +318,8 @@ See [LICENSE](LICENSE) for details.
 
 1. **准备输入**：拼接实部和虚部通道（对于 `istft_A`，先将幅度 + 相位转换为实部 + 虚部）。
 2. **ConvTranspose1d 合成**：使用逆 DFT 基（按 `2/N` 缩放以恢复单侧频谱能量，并加窗）的转置卷积执行重叠相加合成。
-3. **COLA 归一化**：将重建信号除以窗函数平方的重叠累加和，满足恒定重叠相加（COLA）条件，确保完美重建。
-4. **去除中心填充**：如果 STFT 阶段使用了中心填充，则裁剪输出的填充边缘。
+3. **重叠归一化**：动态帧数时运行时计算窗函数平方的重叠累加和并执行除法；固定帧数时乘以预计算的倒数。对于无重叠的端点（如未居中 Hann 窗），输出零而非非有限值。
+4. **去除中心填充**：如果 STFT 阶段使用了中心填充，则通过 ConvTranspose1d 的 padding 裁剪两侧。
 
 ---
 
@@ -333,7 +330,7 @@ See [LICENSE](LICENSE) for details.
 | 参数                 | 默认值       | 说明                                                                 |
 |:---------------------|:-----------:|:---------------------------------------------------------------------|
 | `DYNAMIC_AXES`       | `True`      | `True` → ONNX 接受可变长度音频；`False` → 固定长度                    |
-| `OPSET`              | `17`        | ONNX opset 版本                                                      |
+| `OPSET`              | `18`        | ONNX opset 版本                                                      |
 | `NFFT`               | `400`       | FFT 大小（折叠前的频率 bin 数）                                       |
 | `WIN_LENGTH`         | `400`       | 分析窗长度（采样点数，≤ `NFFT`）                                      |
 | `HOP_LENGTH`         | `160`       | 连续帧之间的步长                                                      |
@@ -341,7 +338,6 @@ See [LICENSE](LICENSE) for details.
 | `CENTER_PAD`         | `True`      | 填充信号使帧中心与采样点索引对齐                                       |
 | `PAD_MODE`           | `'constant'`| `CENTER_PAD=True` 时的填充模式：`'reflect'` 或 `'constant'`           |
 | `INPUT_AUDIO_LENGTH` | `16000`     | 导出时虚拟张量的波形长度（采样点数）                                    |
-| `MAX_SIGNAL_LENGTH`  | `2048`      | ISTFT 预分配缓冲区的帧数上限                                          |
 | `STFT_TYPE`          | `'stft_B'`  | 导出的 STFT 变体                                                      |
 | `ISTFT_TYPE`         | `'istft_B'` | 导出的 ISTFT 变体                                                     |
 
@@ -359,6 +355,8 @@ python STFT_Process.py
 - 导出 `stft_B.onnx` 和 `istft_B.onnx`（或配置的其他变体）。
 - 打印 ONNX 输出与 `torch.stft` / `torch.istft` 的对比验证结果。
 - 执行往返重建测试并报告平均绝对误差。
+
+设置 `DYNAMIC_AXES=False` 时，ISTFT 导出使用 `STFT_SIGNAL_LENGTH` 帧及预计算的重叠和倒数，以乘法替代运行时归一化卷积和除法。设置 `DYNAMIC_AXES=True` 时支持可变帧数，并按实际输入计算归一化。直接构造 `STFT_Process` 时，可设置 `dynamic_frames=False`，并将 `max_frames` 设为输入帧数，以选择固定帧数路径。
 
 **依赖库：**
 ```
@@ -382,7 +380,6 @@ from STFT_Process import STFT_Process
 NFFT = 400
 WIN_LENGTH = 400
 HOP_LENGTH = 160
-MAX_SIGNAL_LENGTH = 1024
 WINDOW_TYPE = 'hann'
 
 # 加载音频为 float32 张量，形状为 (1, 1, 采样点数)
@@ -394,7 +391,6 @@ stft_model = STFT_Process(
     n_fft=NFFT,
     win_length=WIN_LENGTH,
     hop_len=HOP_LENGTH,
-    max_frames=MAX_SIGNAL_LENGTH,
     window_type=WINDOW_TYPE
 ).eval()
 
@@ -408,7 +404,6 @@ istft_model = STFT_Process(
     n_fft=NFFT,
     win_length=WIN_LENGTH,
     hop_len=HOP_LENGTH,
-    max_frames=MAX_SIGNAL_LENGTH,
     window_type=WINDOW_TYPE
 ).eval()
 
@@ -464,7 +459,6 @@ NFFT = 512
 WIN_LENGTH = 400
 HOP_LENGTH = 160
 SAMPLE_RATE = 16000
-MAX_SIGNAL_LENGTH = 1024
 
 # 加载音频
 audio = torch.tensor(
@@ -476,11 +470,11 @@ audio = torch.tensor(
 ).reshape(1, 1, -1)
 
 # STFT
-stft = STFT_Process('stft_B', n_fft=NFFT, win_length=WIN_LENGTH, hop_len=HOP_LENGTH, max_frames=MAX_SIGNAL_LENGTH).eval()
+stft = STFT_Process('stft_B', n_fft=NFFT, win_length=WIN_LENGTH, hop_len=HOP_LENGTH).eval()
 real, imag = stft(audio)
 
 # ISTFT
-istft = STFT_Process('istft_B', n_fft=NFFT, win_length=WIN_LENGTH, hop_len=HOP_LENGTH, max_frames=MAX_SIGNAL_LENGTH).eval()
+istft = STFT_Process('istft_B', n_fft=NFFT, win_length=WIN_LENGTH, hop_len=HOP_LENGTH).eval()
 reconstructed = istft(real, imag).to(torch.int16)
 
 sf.write('./reconstructed.wav', reconstructed.reshape(-1), SAMPLE_RATE, format='WAVEX')
